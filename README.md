@@ -42,6 +42,7 @@ Additional library shortcodes:
 
 ```text
 [neuroecho_reading_room]
+[neuroecho_library_summary]
 [neuroecho_library_loan_status]
 [neuroecho_book_reservations]
 [neuroecho_book_reviews]

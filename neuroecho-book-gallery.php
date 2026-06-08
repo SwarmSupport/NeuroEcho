@@ -33,8 +33,10 @@ final class NeuroEcho_Book_Gallery {
 		add_action( 'save_post_' . self::CPT, array( $this, 'save_book_meta' ) );
 		add_action( 'save_post_post', array( $this, 'save_book_meta' ) );
 		add_action( 'wp_enqueue_scripts', array( $this, 'register_assets' ) );
+		add_action( 'manage_' . self::CPT . '_posts_custom_column', array( $this, 'render_book_admin_column' ), 10, 2 );
 
 		add_shortcode( 'neuroecho_book_gallery', array( $this, 'render_gallery_shortcode' ) );
+		add_shortcode( 'neuroecho_library_summary', array( $this, 'render_library_summary_shortcode' ) );
 		add_shortcode( 'neuroecho_library_loan_status', array( $this, 'render_loan_status_shortcode' ) );
 		add_shortcode( 'neuroecho_book_reservations', array( $this, 'render_reservations_shortcode' ) );
 		add_shortcode( 'neuroecho_reading_room', array( $this, 'render_reading_room_shortcode' ) );
@@ -47,6 +49,7 @@ final class NeuroEcho_Book_Gallery {
 		add_filter( 'template_include', array( $this, 'page_template' ) );
 		add_filter( 'body_class', array( $this, 'body_class' ) );
 		add_filter( 'comment_form_defaults', array( $this, 'comment_form_defaults' ) );
+		add_filter( 'manage_' . self::CPT . '_posts_columns', array( $this, 'book_admin_columns' ) );
 	}
 
 	public static function activate() {
@@ -195,6 +198,43 @@ final class NeuroEcho_Book_Gallery {
 				'normal',
 				'high'
 			);
+		}
+	}
+
+	public function book_admin_columns( $columns ) {
+		$next_columns = array();
+
+		foreach ( $columns as $key => $label ) {
+			$next_columns[ $key ] = $label;
+
+			if ( 'title' === $key ) {
+				$next_columns['ne_book_shelf']  = __( 'Shelf', 'neuroecho-book-gallery' );
+				$next_columns['ne_book_status'] = __( 'Loan Status', 'neuroecho-book-gallery' );
+				$next_columns['ne_book_copies'] = __( 'Copies', 'neuroecho-book-gallery' );
+				$next_columns['ne_book_due']    = __( 'Due Date', 'neuroecho-book-gallery' );
+			}
+		}
+
+		return $next_columns;
+	}
+
+	public function render_book_admin_column( $column, $post_id ) {
+		$meta = self::get_book_meta( $post_id );
+
+		switch ( $column ) {
+			case 'ne_book_shelf':
+				echo $meta['shelf_location'] ? esc_html( $meta['shelf_location'] ) : '&mdash;';
+				break;
+			case 'ne_book_status':
+				echo esc_html( self::get_loan_status_label( $meta['loan_status'] ) );
+				break;
+			case 'ne_book_copies':
+				echo '' !== (string) $meta['available_copies'] ? esc_html( number_format_i18n( absint( $meta['available_copies'] ) ) ) : '&mdash;';
+				break;
+			case 'ne_book_due':
+				$due_label = self::get_due_date_label( $meta );
+				echo $due_label ? esc_html( $due_label ) : '&mdash;';
+				break;
 		}
 	}
 
@@ -974,6 +1014,67 @@ final class NeuroEcho_Book_Gallery {
 		return '<nav class="ne-book-pagination" aria-label="' . esc_attr__( 'Book pagination', 'neuroecho-book-gallery' ) . '">' . $links . '</nav>';
 	}
 
+	private function get_library_summary() {
+		$books = new WP_Query(
+			array(
+				'post_type'              => $this->get_gallery_post_types(),
+				'post_status'            => 'publish',
+				'posts_per_page'         => -1,
+				'fields'                 => 'ids',
+				'no_found_rows'          => true,
+				'update_post_meta_cache' => false,
+				'update_post_term_cache' => false,
+			)
+		);
+		$summary = array(
+			'total'       => 0,
+			'available'   => 0,
+			'reserved'    => 0,
+			'checked_out' => 0,
+			'reference'   => 0,
+			'shelves'     => count( $this->get_shelf_locations() ),
+		);
+
+		foreach ( $books->posts as $book_id ) {
+			$meta = self::get_book_meta( $book_id );
+			$summary['total']++;
+
+			if ( isset( $summary[ $meta['loan_status'] ] ) ) {
+				$summary[ $meta['loan_status'] ]++;
+			}
+		}
+
+		return $summary;
+	}
+
+	public function render_library_summary_shortcode() {
+		$this->enqueue_assets();
+
+		$summary = $this->get_library_summary();
+		$items   = array(
+			'total'       => __( 'Cataloged Books', 'neuroecho-book-gallery' ),
+			'shelves'     => __( 'Shelves', 'neuroecho-book-gallery' ),
+			'available'   => __( 'Available', 'neuroecho-book-gallery' ),
+			'reserved'    => __( 'Reserved', 'neuroecho-book-gallery' ),
+			'checked_out' => __( 'Checked Out', 'neuroecho-book-gallery' ),
+			'reference'   => __( 'Reference', 'neuroecho-book-gallery' ),
+		);
+
+		ob_start();
+		?>
+		<section class="ne-library-summary" aria-label="<?php esc_attr_e( 'Library summary', 'neuroecho-book-gallery' ); ?>">
+			<?php foreach ( $items as $key => $label ) : ?>
+				<div class="ne-library-summary-item">
+					<strong><?php echo esc_html( number_format_i18n( isset( $summary[ $key ] ) ? $summary[ $key ] : 0 ) ); ?></strong>
+					<span><?php echo esc_html( $label ); ?></span>
+				</div>
+			<?php endforeach; ?>
+		</section>
+		<?php
+
+		return ob_get_clean();
+	}
+
 	public function render_loan_status_shortcode( $atts ) {
 		$this->enqueue_assets();
 
@@ -1144,6 +1245,7 @@ final class NeuroEcho_Book_Gallery {
 				<h2><?php echo esc_html( $atts['heading'] ); ?></h2>
 				<p><?php esc_html_e( 'Browse shelves, check availability, save reading positions, and continue discussion from each Book reader page.', 'neuroecho-book-gallery' ); ?></p>
 			</div>
+			<?php echo $this->render_library_summary_shortcode(); ?>
 			<?php echo $this->render_library_hours_shortcode( array( 'compact' => 'true' ) ); ?>
 			<?php echo $this->render_gallery_shortcode( array( 'heading' => $atts['heading'] ) ); ?>
 		</section>

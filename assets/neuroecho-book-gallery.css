@@ -1312,6 +1312,38 @@
 	margin: 0;
 }
 
+.ne-library-summary {
+	display: grid;
+	gap: 12px;
+	grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+	margin: 0 0 24px;
+}
+
+.ne-library-summary-item {
+	background: linear-gradient(135deg, rgba(255, 255, 255, 0.9), rgba(255, 240, 245, 0.72));
+	border: 2px solid rgba(255, 255, 255, 0.82);
+	border-radius: var(--ne-radius);
+	box-shadow: 0 8px 18px rgba(93, 122, 138, 0.1);
+	display: grid;
+	gap: 3px;
+	min-height: 84px;
+	place-content: center;
+	text-align: center;
+}
+
+.ne-library-summary-item strong {
+	color: var(--ne-ink);
+	font-size: clamp(1.5rem, 4vw, 2.4rem);
+	line-height: 1;
+}
+
+.ne-library-summary-item span {
+	color: var(--ne-muted);
+	font-size: 0.78rem;
+	font-weight: 700;
+	text-transform: uppercase;
+}
+
 .ne-library-note {
 	margin-top: 14px;
 }
@@ -1556,6 +1588,7 @@
 
 	.ne-shelf-list,
 	.ne-loan-status-grid,
+	.ne-library-summary,
 	.ne-review-list {
 		grid-template-columns: 1fr;
 	}
