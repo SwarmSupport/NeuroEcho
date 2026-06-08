@@ -1,0 +1,294 @@
+/*
+Theme Name: NeuroEcho Book Gallery
+Author: NeuroEcho
+Description: A lightweight book-sharing WordPress theme wrapper for the NeuroEcho Book Gallery plugin.
+Version: 1.0.0
+Text Domain: neuroecho-book-gallery
+*/
+
+html {
+	box-sizing: border-box;
+	scroll-behavior: smooth;
+}
+
+*,
+*::before,
+*::after {
+	box-sizing: inherit;
+}
+
+@font-face {
+	font-display: swap;
+	font-family: "Quicksand";
+	font-style: normal;
+	font-weight: 300;
+	src: url("assets/fonts/quicksand-300.ttf") format("truetype");
+}
+
+@font-face {
+	font-display: swap;
+	font-family: "Quicksand";
+	font-style: normal;
+	font-weight: 400;
+	src: url("assets/fonts/quicksand-400.ttf") format("truetype");
+}
+
+@font-face {
+	font-display: swap;
+	font-family: "Quicksand";
+	font-style: normal;
+	font-weight: 500;
+	src: url("assets/fonts/quicksand-500.ttf") format("truetype");
+}
+
+@font-face {
+	font-display: swap;
+	font-family: "Quicksand";
+	font-style: normal;
+	font-weight: 600;
+	src: url("assets/fonts/quicksand-600.ttf") format("truetype");
+}
+
+@font-face {
+	font-display: swap;
+	font-family: "Quicksand";
+	font-style: normal;
+	font-weight: 700;
+	src: url("assets/fonts/quicksand-700.ttf") format("truetype");
+}
+
+body {
+	margin: 0;
+	background:
+		linear-gradient(135deg, rgba(255, 255, 255, 0.7), rgba(255, 240, 245, 0.46)),
+		linear-gradient(90deg, rgba(250, 158, 188, 0.08) 1px, transparent 1px),
+		linear-gradient(180deg, rgba(141, 164, 177, 0.1) 1px, transparent 1px),
+		#f8f3ea;
+	background-size: auto, 42px 42px, 42px 42px, auto;
+	color: #5d7a8a;
+	font-family: "Quicksand", -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+	min-height: 100vh;
+	overflow-x: hidden;
+}
+
+img,
+video,
+iframe {
+	height: auto;
+	max-width: 100%;
+}
+
+a {
+	color: inherit;
+	transition: color 160ms ease, text-shadow 160ms ease, transform 160ms ease;
+}
+
+.ne-site-header,
+.ne-site-footer {
+	padding: 28px clamp(18px, 4vw, 42px);
+	text-align: center;
+}
+
+.ne-site-header {
+	align-items: center;
+	background: rgba(248, 243, 234, 0.84);
+	backdrop-filter: blur(8px);
+	border-bottom: 3px solid rgba(250, 158, 188, 0.52);
+	box-shadow: 0 12px 34px rgba(93, 122, 138, 0.12);
+	display: flex;
+	flex-direction: column;
+	gap: 14px;
+	justify-content: center;
+	position: relative;
+	z-index: 20;
+}
+
+.ne-site-header::after,
+.ne-site-footer::before {
+	background: linear-gradient(90deg, #00f0ff, #fa9ebc, #b57edc);
+	content: "";
+	display: block;
+	height: 3px;
+	left: 50%;
+	position: absolute;
+	transform: translateX(-50%);
+	width: min(180px, 46vw);
+}
+
+.ne-site-header::after {
+	bottom: -5px;
+}
+
+.ne-site-branding {
+	display: grid;
+	gap: 8px;
+	justify-items: center;
+	position: relative;
+}
+
+.ne-site-title {
+	align-items: center;
+	color: #3a0ca3;
+	display: inline-flex;
+	font-size: clamp(2rem, 5vw, 4rem);
+	font-weight: 700;
+	gap: clamp(10px, 2vw, 18px);
+	justify-content: center;
+	letter-spacing: 0;
+	line-height: 1;
+	max-width: min(720px, 86vw);
+	text-decoration: none;
+	text-shadow: 2px 2px 0 rgba(255, 255, 255, 0.82), 0 0 18px rgba(250, 158, 188, 0.42);
+}
+
+.ne-site-title-text {
+	overflow-wrap: anywhere;
+}
+
+.ne-site-icon {
+	--ne-site-icon-size: clamp(46px, 7vw, 72px);
+	background: linear-gradient(135deg, #ffffff 0%, #fa9ebc 100%);
+	border: 2px solid #ffffff;
+	border-radius: 8px;
+	box-shadow: 0 8px 18px rgba(250, 158, 188, 0.34);
+	display: inline-flex;
+	flex: 0 0 auto;
+	height: var(--ne-site-icon-size);
+	overflow: hidden;
+	padding: clamp(3px, 0.7vw, 5px);
+	transform: rotate(-6deg);
+	transition: transform 180ms ease, box-shadow 180ms ease;
+	width: var(--ne-site-icon-size);
+}
+
+.ne-site-icon img {
+	border-radius: 6px;
+	display: block;
+	height: 100%;
+	object-fit: cover;
+	object-position: center;
+	width: 100%;
+}
+
+.ne-site-title:hover {
+	color: #ff00ea;
+	text-decoration: none;
+	text-shadow: 2px 2px 0 rgba(255, 255, 255, 0.9), 0 0 12px rgba(255, 0, 234, 0.42);
+}
+
+.ne-site-title:hover .ne-site-icon {
+	transform: rotate(5deg) scale(1.06);
+}
+
+.ne-site-tagline {
+	background: #fa9ebc;
+	border: 2px solid #ffffff;
+	border-radius: 8px;
+	box-shadow: 2px 2px 0 rgba(58, 12, 163, 0.18);
+	color: #ffffff;
+	display: inline-flex;
+	font-family: inherit;
+	font-size: 0.9rem;
+	font-weight: 700;
+	letter-spacing: 0;
+	margin: 0;
+	padding: 5px 12px;
+	transform: rotate(-1deg);
+	text-transform: uppercase;
+}
+
+.ne-site-nav ul {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 10px;
+	justify-content: center;
+	list-style: none;
+	margin: 0;
+	padding: 0;
+}
+
+.ne-site-nav {
+	max-width: min(920px, 92vw);
+}
+
+.ne-site-nav a {
+	background: linear-gradient(135deg, #ffffff 0%, #e0e5ec 100%);
+	border: 1px solid #ffffff;
+	border-radius: 999px;
+	box-shadow: inset 0 2px 4px rgba(255, 255, 255, 0.8), 0 4px 8px rgba(93, 122, 138, 0.09);
+	color: #3a0ca3;
+	display: inline-flex;
+	font-family: inherit;
+	font-size: 0.9rem;
+	font-weight: 700;
+	min-height: 36px;
+	padding: 8px 16px;
+	text-decoration: none;
+	text-transform: uppercase;
+}
+
+.ne-site-nav a:hover {
+	background: linear-gradient(135deg, #ffffff 0%, #fa9ebc 100%);
+	color: #3a0ca3;
+	text-decoration: none;
+	transform: translateY(-1px) scale(1.03);
+}
+
+.ne-site-footer {
+	background: linear-gradient(to top, rgba(248, 243, 234, 0.96), rgba(248, 243, 234, 0.72));
+	border-top: 0;
+	color: #8da4b1;
+	font-size: 0.9rem;
+	margin-top: 42px;
+	position: relative;
+}
+
+.ne-site-footer::before {
+	top: 0;
+}
+
+.ne-site-footer p {
+	background: rgba(255, 255, 255, 0.68);
+	border: 1px solid rgba(250, 158, 188, 0.48);
+	border-radius: 999px;
+	box-shadow: 0 10px 24px rgba(93, 122, 138, 0.1);
+	color: #3a0ca3;
+	display: inline-flex;
+	flex-wrap: wrap;
+	font-family: inherit;
+	font-weight: 700;
+	justify-content: center;
+	letter-spacing: 0;
+	margin: 0 auto;
+	max-width: 680px;
+	padding: 10px 18px;
+}
+
+@media (max-width: 640px) {
+	.ne-site-header,
+	.ne-site-footer {
+		padding-inline: 14px;
+	}
+
+	.ne-site-title {
+		font-size: clamp(1.8rem, 11vw, 3rem);
+		flex-direction: column;
+	}
+
+	.ne-site-nav ul {
+		display: grid;
+		grid-template-columns: 1fr;
+		width: min(100%, 320px);
+	}
+
+	.ne-site-nav a {
+		justify-content: center;
+		min-height: 42px;
+		width: 100%;
+	}
+
+	.ne-site-footer p {
+		border-radius: 8px;
+		width: 100%;
+	}
+}
