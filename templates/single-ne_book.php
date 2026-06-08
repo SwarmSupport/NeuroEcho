@@ -13,10 +13,7 @@ neuroecho_book_gallery()->enqueue_assets();
 get_header();
 ?>
 
-<main id="primary" class="ne-reader-shell" data-ne-reader>
-	<div class="ne-reading-progress" data-ne-reading-progress aria-hidden="true"></div>
-
-	<?php
+<?php
 	while ( have_posts() ) :
 		the_post();
 
@@ -25,6 +22,8 @@ get_header();
 		$gallery_url      = $archive_url ? $archive_url : home_url( '/' );
 		$comments_enabled = comments_open() || get_comments_number();
 		?>
+<main id="primary" class="ne-reader-shell" data-ne-reader data-ne-reader-book-id="<?php echo esc_attr( get_the_ID() ); ?>">
+	<div class="ne-reading-progress" data-ne-reading-progress aria-hidden="true"></div>
 		<article <?php post_class( 'ne-reader' ); ?>>
 			<header class="ne-reader-header">
 				<div class="ne-reader-cover-wrap">
@@ -52,6 +51,37 @@ get_header();
 					<div class="ne-reader-facts">
 						<?php echo NeuroEcho_Book_Gallery::render_book_facts( get_the_ID(), $meta ); ?>
 						<span><?php echo esc_html( NeuroEcho_Book_Gallery::get_comment_count_label( get_the_ID() ) ); ?></span>
+					</div>
+
+					<div class="ne-reader-library-card">
+						<h2><?php esc_html_e( 'Library Card', 'neuroecho-book-gallery' ); ?></h2>
+						<?php echo NeuroEcho_Book_Gallery::render_loan_status_badge( get_the_ID(), $meta ); ?>
+						<dl>
+							<?php if ( $meta['shelf_location'] ) : ?>
+								<div>
+									<dt><?php esc_html_e( 'Shelf', 'neuroecho-book-gallery' ); ?></dt>
+									<dd><?php echo esc_html( $meta['shelf_location'] ); ?></dd>
+								</div>
+							<?php endif; ?>
+							<?php if ( $meta['isbn'] ) : ?>
+								<div>
+									<dt><?php esc_html_e( 'ISBN', 'neuroecho-book-gallery' ); ?></dt>
+									<dd><?php echo esc_html( $meta['isbn'] ); ?></dd>
+								</div>
+							<?php endif; ?>
+							<?php if ( $meta['publication_year'] ) : ?>
+								<div>
+									<dt><?php esc_html_e( 'Published', 'neuroecho-book-gallery' ); ?></dt>
+									<dd><?php echo esc_html( number_format_i18n( absint( $meta['publication_year'] ) ) ); ?></dd>
+								</div>
+							<?php endif; ?>
+							<?php if ( $meta['page_count'] ) : ?>
+								<div>
+									<dt><?php esc_html_e( 'Pages', 'neuroecho-book-gallery' ); ?></dt>
+									<dd><?php echo esc_html( number_format_i18n( absint( $meta['page_count'] ) ) ); ?></dd>
+								</div>
+							<?php endif; ?>
+						</dl>
 					</div>
 
 					<div class="ne-reader-actions" aria-label="<?php esc_attr_e( 'Reader shortcuts', 'neuroecho-book-gallery' ); ?>">
@@ -87,6 +117,27 @@ get_header();
 						<button type="button" data-ne-reset-reader><?php esc_html_e( 'Reset', 'neuroecho-book-gallery' ); ?></button>
 						<a href="#primary"><?php esc_html_e( 'Top', 'neuroecho-book-gallery' ); ?></a>
 					</div>
+
+					<div class="ne-reader-memory" data-ne-reader-memory hidden>
+						<p data-ne-reader-memory-text></p>
+						<div class="ne-reader-mini-actions">
+							<button type="button" data-ne-resume-reading><?php esc_html_e( 'Resume', 'neuroecho-book-gallery' ); ?></button>
+							<button type="button" data-ne-clear-position><?php esc_html_e( 'Clear', 'neuroecho-book-gallery' ); ?></button>
+						</div>
+					</div>
+
+					<div class="ne-reader-bookmark-panel">
+						<h2><?php esc_html_e( 'Bookmarks', 'neuroecho-book-gallery' ); ?></h2>
+						<button type="button" data-ne-bookmark-toggle><?php esc_html_e( 'Save bookmark', 'neuroecho-book-gallery' ); ?></button>
+						<div class="ne-reader-saved-list" data-ne-bookmarks></div>
+					</div>
+
+					<div class="ne-reader-annotation-panel">
+						<label for="ne-reader-annotation"><?php esc_html_e( 'Annotation', 'neuroecho-book-gallery' ); ?></label>
+						<textarea id="ne-reader-annotation" rows="3" data-ne-annotation-input></textarea>
+						<button type="button" data-ne-save-annotation><?php esc_html_e( 'Save note', 'neuroecho-book-gallery' ); ?></button>
+						<div class="ne-reader-saved-list" data-ne-annotations></div>
+					</div>
 				</aside>
 
 				<div id="ne-reader-content" class="ne-reader-content" data-ne-reader-content tabindex="-1">
@@ -109,8 +160,8 @@ get_header();
 				<?php comments_template(); ?>
 			</section>
 		<?php endif; ?>
+	</main>
 	<?php endwhile; ?>
-</main>
 
 <?php
 get_footer();

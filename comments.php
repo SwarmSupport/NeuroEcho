@@ -21,10 +21,10 @@ if ( post_password_required() ) {
 			printf(
 				esc_html(
 					_nx(
-						'One comment',
-						'%s comments',
+						'One review',
+						'%s reviews',
 						get_comments_number(),
-						'comments title',
+						'reviews title',
 						'neuroecho-book-gallery'
 					)
 				),

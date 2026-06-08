@@ -9,11 +9,12 @@ A WordPress plugin that adds a searchable book gallery, multi-author support, an
 - Falls back to the WordPress post author when no Book Author term is set
 - Searchable gallery shortcode with author filtering; shows all shared books by default
 - Normal WordPress posts are included in the gallery as books, using the post title, content, author, comments, and featured image
-- Share-site metadata: subtitle, cover URL, format label, reading time, and an optional share note
-- Search across book title/content, subtitle, format label, share note, Book Author terms, WordPress user authors, and approved comments
+- Library metadata: ISBN or local ID, publication year, page count, shelf location, available copies, loan status, due date, subtitle, cover URL, format label, reading time, and share note
+- Search and filtering across book title/content, metadata, shelf, availability, Book Author terms, WordPress user authors, and approved comments
 - No-results searches show the available user-authored books as compact fallback results
-- Reader template for Books and normal posts with progress bar, table of contents, theme controls, text size, line width controls, and mobile-friendly layout
-- Theme wrapper supports desktop and mobile layouts for the gallery, reader, header, footer, and comments
+- Reader template for Books and normal posts with progress bar, table of contents, theme controls, text size, line width controls, bookmarks, annotations, saved reading position, and mobile-friendly layout
+- Library page templates for reading room, book loan status, reservations, reviews, and hours
+- Theme wrapper supports desktop and mobile layouts for the gallery, shelves, reader, header, footer, and comments
 - Native WordPress comments, compatible with comment-form CAPTCHA plugins such as Simple CAPTCHA Alternative with Cloudflare Turnstile
 - No external font API or CDN dependency; the original Quicksand style is packaged locally
 
@@ -36,6 +37,16 @@ Optional shortcode attributes:
 ```
 
 Omit `limit` or use `limit="all"` to show every shared book.
+
+Additional library shortcodes:
+
+```text
+[neuroecho_reading_room]
+[neuroecho_library_loan_status]
+[neuroecho_book_reservations]
+[neuroecho_book_reviews]
+[neuroecho_library_hours]
+```
 
 ## Comments and Turnstile
 
