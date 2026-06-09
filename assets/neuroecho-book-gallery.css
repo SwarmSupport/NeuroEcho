@@ -1166,11 +1166,15 @@ body[data-ne-reader-theme="night"] .ne-site-nav a {
 
 .ne-reader-memory p,
 .ne-reader-saved-list p {
+	align-items: center;
 	color: var(--ne-reader-muted);
+	display: flex;
 	font-size: 0.86rem;
 	font-weight: 700;
+	justify-content: center;
 	line-height: 1.35;
 	margin: 0 0 10px;
+	min-height: 34px;
 	text-align: center;
 }
 
@@ -1195,11 +1199,13 @@ body[data-ne-reader-theme="night"] .ne-site-nav a {
 
 .ne-reader-bookmark-panel,
 .ne-reader-annotation-panel {
+	align-items: center;
 	background: var(--ne-reader-card);
 	border: 1px solid var(--ne-reader-line);
 	border-radius: var(--ne-radius);
 	display: grid;
 	gap: 10px;
+	justify-items: center;
 	padding: 12px;
 	text-align: center;
 }
@@ -1208,6 +1214,7 @@ body[data-ne-reader-theme="night"] .ne-site-nav a {
 .ne-reader-annotation-panel > button,
 .ne-reader-mini-actions button,
 .ne-reader-saved-item button {
+	align-items: center;
 	background: var(--ne-reader-button);
 	border: 1px solid var(--ne-reader-line);
 	border-radius: 999px;
@@ -1247,16 +1254,22 @@ body[data-ne-reader-theme="night"] .ne-site-nav a {
 .ne-reader-saved-list {
 	display: grid;
 	gap: 8px;
+	justify-self: stretch;
 	margin-top: 0;
 	min-width: 0;
+	width: 100%;
 }
 
 .ne-reader-saved-list p {
+	align-items: center;
 	background:
 		linear-gradient(135deg, color-mix(in srgb, var(--ne-reader-field) 86%, transparent), color-mix(in srgb, var(--ne-reader-card) 78%, transparent));
 	border: 1px dashed var(--ne-reader-line);
 	border-radius: var(--ne-radius);
+	display: flex;
+	justify-content: center;
 	margin: 0;
+	min-height: 42px;
 	padding: 10px;
 	text-align: center;
 }
