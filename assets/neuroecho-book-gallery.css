@@ -1171,6 +1171,7 @@ body[data-ne-reader-theme="night"] .ne-site-nav a {
 	font-weight: 700;
 	line-height: 1.35;
 	margin: 0 0 10px;
+	text-align: center;
 }
 
 .ne-reader-mini-actions {
@@ -1188,6 +1189,7 @@ body[data-ne-reader-theme="night"] .ne-site-nav a {
 	font-weight: 700;
 	letter-spacing: 0;
 	margin: 0 0 8px;
+	text-align: center;
 	text-transform: uppercase;
 }
 
@@ -1199,6 +1201,7 @@ body[data-ne-reader-theme="night"] .ne-site-nav a {
 	display: grid;
 	gap: 10px;
 	padding: 12px;
+	text-align: center;
 }
 
 .ne-reader-bookmark-panel > button,
@@ -1222,8 +1225,9 @@ body[data-ne-reader-theme="night"] .ne-site-nav a {
 
 .ne-reader-bookmark-panel > button,
 .ne-reader-annotation-panel > button {
-	justify-self: start;
+	justify-self: center;
 	padding: 0 14px;
+	text-align: center;
 }
 
 .ne-reader-annotation-panel textarea {
@@ -1236,6 +1240,7 @@ body[data-ne-reader-theme="night"] .ne-site-nav a {
 	min-height: 96px;
 	padding: 9px 10px;
 	resize: vertical;
+	text-align: center;
 	width: 100%;
 }
 
@@ -1253,6 +1258,7 @@ body[data-ne-reader-theme="night"] .ne-site-nav a {
 	border-radius: var(--ne-radius);
 	margin: 0;
 	padding: 10px;
+	text-align: center;
 }
 
 .ne-reader-saved-item {
