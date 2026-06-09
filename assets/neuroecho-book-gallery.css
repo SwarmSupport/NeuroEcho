@@ -1591,22 +1591,24 @@ body[data-ne-reader-theme="night"] .ne-site-nav a {
 	border-radius: var(--ne-radius);
 	display: grid;
 	gap: 12px;
+	overflow: hidden;
 	padding: clamp(14px, 3vw, 18px);
 }
 
 .ne-reader-comments .comment-meta {
-	align-items: center;
+	align-items: start;
 	display: grid;
-	gap: 3px 12px;
-	grid-template-columns: 48px minmax(0, 1fr);
+	gap: 4px;
+	min-height: 54px;
+	padding-left: 62px;
+	position: relative;
 }
 
 .ne-reader-comments .comment-author {
 	align-items: center;
-	display: grid;
-	gap: 0 12px;
-	grid-column: 1 / -1;
-	grid-template-columns: 48px minmax(0, 1fr);
+	display: flex;
+	gap: 8px;
+	min-width: 0;
 }
 
 .ne-reader-comments .avatar {
@@ -1614,9 +1616,11 @@ body[data-ne-reader-theme="night"] .ne-site-nav a {
 	border: 2px solid color-mix(in srgb, var(--ne-ruby) 46%, #ffffff);
 	border-radius: 999px;
 	box-shadow: 0 8px 16px rgba(93, 122, 138, 0.12);
-	grid-row: 1;
 	height: 48px;
+	left: 0;
 	object-fit: cover;
+	position: absolute;
+	top: 1px;
 	width: 48px;
 }
 
@@ -1631,6 +1635,9 @@ body[data-ne-reader-theme="night"] .ne-site-nav a {
 .ne-reader-comments .comment-author .fn a {
 	color: var(--ne-reader-text);
 	font-size: 0.98rem;
+	line-height: 1.25;
+	min-width: 0;
+	overflow-wrap: anywhere;
 	text-decoration: none;
 }
 
@@ -1649,12 +1656,21 @@ body[data-ne-reader-theme="night"] .ne-site-nav a {
 	display: flex;
 	flex-wrap: wrap;
 	gap: 6px 10px;
-	grid-column: 2;
-	line-height: 1.25;
+	line-height: 1.35;
+	min-width: 0;
 }
 
 .ne-reader-comments .comment-metadata a {
+	display: inline-flex;
+	max-width: 100%;
 	text-decoration: none;
+	white-space: normal;
+	word-break: keep-all;
+}
+
+.ne-reader-comments .comment-metadata time {
+	overflow-wrap: anywhere;
+	word-break: keep-all;
 }
 
 .ne-reader-comments .comment-metadata a:hover,
@@ -1704,8 +1720,15 @@ body[data-ne-reader-theme="night"] .ne-site-nav a {
 }
 
 .ne-reader-comments .comment-edit-link {
+	align-items: center;
+	background: color-mix(in srgb, var(--ne-ruby) 12%, transparent);
+	border: 1px solid color-mix(in srgb, var(--ne-ruby) 36%, transparent);
+	border-radius: 999px;
 	color: var(--ne-ruby);
+	display: inline-flex;
 	font-weight: 800;
+	min-height: 26px;
+	padding: 0 9px;
 	text-decoration: none;
 }
 
