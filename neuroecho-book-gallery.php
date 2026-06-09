@@ -2,7 +2,7 @@
 /**
  * Plugin Name: NeuroEcho Book Gallery
  * Description: Adds a searchable book gallery, multi-author support, and an accessible long-form reader for WordPress.
- * Version: 1.0.3
+ * Version: 1.0.4
  * Author: NeuroEcho
  * Text Domain: neuroecho-book-gallery
  */
@@ -12,7 +12,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 final class NeuroEcho_Book_Gallery {
-	const VERSION    = '1.0.3';
+	const VERSION    = '1.0.4';
 	const CPT        = 'ne_book';
 	const TAX_AUTHOR = 'ne_book_author';
 	const META       = '_ne_book_';
