@@ -2,7 +2,7 @@
 /**
  * Plugin Name: NeuroEcho Book Gallery
  * Description: Adds a searchable book gallery, multi-author support, and an accessible long-form reader for WordPress.
- * Version: 1.0.0
+ * Version: 1.0.1
  * Author: NeuroEcho
  * Text Domain: neuroecho-book-gallery
  */
@@ -12,7 +12,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 final class NeuroEcho_Book_Gallery {
-	const VERSION    = '1.0.0';
+	const VERSION    = '1.0.1';
 	const CPT        = 'ne_book';
 	const TAX_AUTHOR = 'ne_book_author';
 	const META       = '_ne_book_';
@@ -1558,14 +1558,18 @@ final class NeuroEcho_Book_Gallery {
 			$link = get_term_link( $term );
 
 			if ( is_wp_error( $link ) ) {
-				$links[] = '<span>' . esc_html( $term->name ) . '</span>';
+				$links[] = '<span class="ne-tag-chip"><span aria-hidden="true">#</span><span class="ne-tag-chip-text">' . esc_html( $term->name ) . '</span></span>';
 				continue;
 			}
 
-			$links[] = sprintf( '<a href="%s" rel="tag">%s</a>', esc_url( $link ), esc_html( $term->name ) );
+			$links[] = sprintf(
+				'<a class="ne-tag-chip" href="%s" rel="tag"><span aria-hidden="true">#</span><span class="ne-tag-chip-text">%s</span></a>',
+				esc_url( $link ),
+				esc_html( $term->name )
+			);
 		}
 
-		return implode( '', $links );
+		return implode( "\n", $links );
 	}
 
 	public static function render_author_links( $post_id ) {

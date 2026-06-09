@@ -494,44 +494,62 @@
 
 .ne-book-tags,
 .ne-reader-tags {
+	align-items: flex-start;
 	display: flex;
 	flex-wrap: wrap;
-	gap: 6px;
-}
-
-.ne-book-tags a,
-.ne-book-tags span,
-.ne-reader-tags a,
-.ne-reader-tags span {
-	align-items: center;
-	background: rgba(0, 240, 255, 0.14);
-	border: 1px solid rgba(0, 240, 255, 0.28);
-	border-radius: 999px;
-	color: var(--ne-ink);
-	display: inline-flex;
-	font-size: 0.76rem;
-	font-weight: 700;
-	line-height: 1.2;
-	min-height: 24px;
-	padding: 3px 9px;
-	text-decoration: none;
-	text-transform: uppercase;
-}
-
-.ne-reader-tags a,
-.ne-reader-tags span {
-	color: var(--ne-reader-text);
-}
-
-.ne-book-tags a:hover,
-.ne-reader-tags a:hover {
-	background: rgba(250, 158, 188, 0.22);
-	color: var(--ne-magenta);
-	text-decoration: none;
+	gap: 7px;
+	max-width: 100%;
 }
 
 .ne-reader-tags {
-	margin-top: 10px;
+	background: color-mix(in srgb, var(--ne-reader-card) 74%, transparent);
+	border: 1px solid var(--ne-reader-line);
+	border-radius: var(--ne-radius);
+	margin-top: 12px;
+	padding: 10px;
+}
+
+.ne-tag-chip {
+	align-items: center;
+	background: linear-gradient(135deg, rgba(255, 255, 255, 0.86), rgba(0, 240, 255, 0.18));
+	border: 1px solid rgba(0, 240, 255, 0.3);
+	border-radius: 999px;
+	box-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.78), 0 3px 8px rgba(93, 122, 138, 0.08);
+	color: var(--ne-ink);
+	display: inline-flex;
+	font-size: 0.78rem;
+	font-weight: 700;
+	gap: 3px;
+	line-height: 1.2;
+	max-width: 100%;
+	min-height: 28px;
+	padding: 5px 10px;
+	text-decoration: none;
+	text-transform: none;
+	white-space: normal;
+}
+
+.ne-reader-tags .ne-tag-chip {
+	background: var(--ne-reader-card);
+	border-color: var(--ne-reader-line);
+	color: var(--ne-reader-text);
+}
+
+.ne-tag-chip > span[aria-hidden="true"] {
+	color: var(--ne-ruby);
+	flex: 0 0 auto;
+}
+
+.ne-tag-chip-text {
+	min-width: 0;
+	overflow-wrap: anywhere;
+	word-break: normal;
+}
+
+.ne-tag-chip:hover {
+	background: rgba(250, 158, 188, 0.22);
+	color: var(--ne-magenta);
+	text-decoration: none;
 }
 
 .ne-book-status-row {
