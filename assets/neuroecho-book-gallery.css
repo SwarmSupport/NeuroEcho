@@ -135,7 +135,9 @@
 	letter-spacing: 0;
 	line-height: 1;
 	margin: 0;
+	overflow-wrap: anywhere;
 	text-shadow: 2px 2px 0 rgba(255, 255, 255, 0.86), 0 0 14px rgba(250, 158, 188, 0.32);
+	text-wrap: balance;
 }
 
 .ne-gallery-count {
@@ -862,7 +864,7 @@
 	display: grid;
 	gap: clamp(14px, 2vw, 26px);
 	grid-template-columns: minmax(220px, min(30vw, 320px)) minmax(0, 720px);
-	justify-content: flex-start;
+	justify-content: center;
 	margin-bottom: clamp(22px, 5vw, 54px);
 	padding-bottom: clamp(18px, 4vw, 38px);
 }
@@ -899,7 +901,11 @@
 
 .ne-reader-title-block h1 {
 	color: var(--ne-reader-text);
-	max-width: 13ch;
+	font-size: 3.55rem;
+	line-break: anywhere;
+	line-height: 1.04;
+	max-width: min(100%, 18ch);
+	word-break: break-word;
 }
 
 .ne-reader-subtitle {
@@ -1194,6 +1200,11 @@
 }
 
 .ne-reader-content {
+	background: var(--ne-reader-panel);
+	background: color-mix(in srgb, var(--ne-reader-panel) 82%, transparent);
+	border: 1px solid var(--ne-reader-line);
+	border-radius: var(--ne-radius);
+	box-shadow: 0 12px 30px rgba(93, 122, 138, 0.1);
 	color: var(--ne-reader-text);
 	font-size: var(--ne-reader-size);
 	font-weight: 500;
@@ -1201,8 +1212,9 @@
 	margin-inline: auto;
 	max-width: var(--ne-reader-measure);
 	min-width: 0;
-	scroll-margin-top: 22px;
 	overflow-wrap: anywhere;
+	padding: clamp(18px, 4vw, 42px);
+	scroll-margin-top: 22px;
 	word-break: normal;
 }
 
@@ -1219,6 +1231,7 @@
 .ne-reader-content li {
 	font-size: inherit;
 	line-height: inherit;
+	text-wrap: pretty;
 }
 
 .ne-reader-content p {
@@ -1234,6 +1247,7 @@
 	letter-spacing: 0;
 	line-height: 1.08;
 	margin: 2.1em 0 0.7em;
+	overflow-wrap: anywhere;
 }
 
 .ne-reader-content h2 {
@@ -1488,13 +1502,17 @@
 
 .ne-library-page,
 .ne-reading-room,
-.ne-author-page {
+.ne-author-page,
+.ne-search-page,
+.ne-tag-page {
 	margin: clamp(22px, 4vw, 56px) auto;
 	max-width: 1180px;
 	padding: 0 clamp(14px, 3vw, 24px);
 }
 
-.ne-author-archive {
+.ne-author-archive,
+.ne-search-archive,
+.ne-tag-archive {
 	margin-inline: auto;
 }
 
@@ -1750,6 +1768,7 @@
 	}
 
 	.ne-reader-title-block h1 {
+		font-size: 2.75rem;
 		max-width: none;
 	}
 
@@ -1841,6 +1860,11 @@
 	.ne-reader-content {
 		font-size: min(var(--ne-reader-size), 19px);
 		line-height: 1.68;
+		padding: 18px;
+	}
+
+	.ne-reader-title-block h1 {
+		font-size: 2.2rem;
 	}
 
 	.ne-reader-content h2 {

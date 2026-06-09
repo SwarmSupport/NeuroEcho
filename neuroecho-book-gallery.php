@@ -2,7 +2,7 @@
 /**
  * Plugin Name: NeuroEcho Book Gallery
  * Description: Adds a searchable book gallery, multi-author support, and an accessible long-form reader for WordPress.
- * Version: 1.0.1
+ * Version: 1.0.2
  * Author: NeuroEcho
  * Text Domain: neuroecho-book-gallery
  */
@@ -12,7 +12,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 final class NeuroEcho_Book_Gallery {
-	const VERSION    = '1.0.1';
+	const VERSION    = '1.0.2';
 	const CPT        = 'ne_book';
 	const TAX_AUTHOR = 'ne_book_author';
 	const META       = '_ne_book_';
@@ -34,6 +34,7 @@ final class NeuroEcho_Book_Gallery {
 		add_action( 'save_post_post', array( $this, 'save_book_meta' ) );
 		add_action( 'wp_enqueue_scripts', array( $this, 'register_assets' ) );
 		add_action( 'manage_' . self::CPT . '_posts_custom_column', array( $this, 'render_book_admin_column' ), 10, 2 );
+		add_action( 'pre_get_posts', array( $this, 'include_books_in_library_archives' ) );
 
 		add_shortcode( 'neuroecho_book_gallery', array( $this, 'render_gallery_shortcode' ) );
 		add_shortcode( 'neuroecho_library_summary', array( $this, 'render_library_summary_shortcode' ) );
@@ -46,6 +47,8 @@ final class NeuroEcho_Book_Gallery {
 		add_filter( 'single_template', array( $this, 'single_template' ) );
 		add_filter( 'archive_template', array( $this, 'archive_template' ) );
 		add_filter( 'author_template', array( $this, 'author_template' ) );
+		add_filter( 'search_template', array( $this, 'search_template' ) );
+		add_filter( 'tag_template', array( $this, 'tag_template' ) );
 		add_filter( 'taxonomy_template', array( $this, 'taxonomy_template' ) );
 		add_filter( 'theme_page_templates', array( $this, 'register_page_templates' ) );
 		add_filter( 'template_include', array( $this, 'page_template' ) );
@@ -384,6 +387,16 @@ final class NeuroEcho_Book_Gallery {
 		wp_enqueue_script( 'neuroecho-book-gallery' );
 	}
 
+	public function include_books_in_library_archives( $query ) {
+		if ( is_admin() || ! $query instanceof WP_Query || ! $query->is_main_query() ) {
+			return;
+		}
+
+		if ( $query->is_tag() || $query->is_search() ) {
+			$query->set( 'post_type', self::get_library_post_types() );
+		}
+	}
+
 	private function asset_url( $path ) {
 		$path       = ltrim( $path, '/' );
 		$plugin_dir = trailingslashit( wp_normalize_path( plugin_dir_path( __FILE__ ) ) );
@@ -417,7 +430,7 @@ final class NeuroEcho_Book_Gallery {
 		$limit_value     = trim( (string) $atts['limit'] );
 		$show_all        = $this->is_all_limit( $limit_value );
 		$limit           = $show_all ? -1 : max( 1, min( 200, absint( $limit_value ) ) );
-		$search          = isset( $_GET['ne_book_search'] ) ? trim( $this->sanitize_request_value( $_GET['ne_book_search'] ) ) : '';
+		$search          = $this->get_gallery_search_value();
 		$has_search      = '' !== $search;
 		$request_author  = isset( $_GET['ne_book_author'] ) ? sanitize_title( $this->sanitize_request_value( $_GET['ne_book_author'] ) ) : '';
 		$selected_author = $request_author;
@@ -539,7 +552,7 @@ final class NeuroEcho_Book_Gallery {
 			</div>
 
 			<?php if ( 'false' !== strtolower( (string) $atts['show_search'] ) ) : ?>
-				<form class="ne-gallery-search" role="search" method="get" action="<?php echo esc_url( remove_query_arg( array( 'ne_book_page', 'ne_book_search', 'ne_book_author', 'ne_book_shelf', 'ne_book_availability' ) ) ); ?>">
+				<form class="ne-gallery-search" role="search" method="get" action="<?php echo esc_url( remove_query_arg( array( 's', 'ne_book_page', 'ne_book_search', 'ne_book_author', 'ne_book_shelf', 'ne_book_availability' ) ) ); ?>">
 					<label class="screen-reader-text" for="<?php echo esc_attr( $instance_id ); ?>search"><?php esc_html_e( 'Search books', 'neuroecho-book-gallery' ); ?></label>
 					<input id="<?php echo esc_attr( $instance_id ); ?>search" name="ne_book_search" type="search" value="<?php echo esc_attr( $search ); ?>" placeholder="<?php esc_attr_e( 'Search titles, authors, notes, or comments', 'neuroecho-book-gallery' ); ?>" />
 
@@ -580,7 +593,7 @@ final class NeuroEcho_Book_Gallery {
 					<button type="submit"><?php esc_html_e( 'Search', 'neuroecho-book-gallery' ); ?></button>
 
 					<?php if ( $has_search || ( $request_author && ! $fixed_author ) || $selected_shelf || $availability ) : ?>
-						<a class="ne-gallery-reset" href="<?php echo esc_url( remove_query_arg( array( 'ne_book_search', 'ne_book_author', 'ne_book_shelf', 'ne_book_availability', 'ne_book_page' ) ) ); ?>">
+						<a class="ne-gallery-reset" href="<?php echo esc_url( remove_query_arg( array( 's', 'ne_book_search', 'ne_book_author', 'ne_book_shelf', 'ne_book_availability', 'ne_book_page' ) ) ); ?>">
 							<?php esc_html_e( 'Reset', 'neuroecho-book-gallery' ); ?>
 						</a>
 					<?php endif; ?>
@@ -591,17 +604,17 @@ final class NeuroEcho_Book_Gallery {
 				<?php echo $this->render_shelf_browser( $selected_shelf ); ?>
 			<?php endif; ?>
 
-				<?php if ( $books->have_posts() ) : ?>
-					<div class="ne-book-grid">
-						<?php
-						while ( $books->have_posts() ) :
-							$books->the_post();
-							echo self::render_book_card( get_the_ID() );
-						endwhile;
-						?>
-					</div>
+			<?php if ( $books->have_posts() ) : ?>
+				<div class="ne-book-grid">
+					<?php
+					while ( $books->have_posts() ) :
+						$books->the_post();
+						echo self::render_book_card( get_the_ID() );
+					endwhile;
+					?>
+				</div>
 
-					<?php echo $show_all ? '' : $this->render_pagination( $books, $paged ); ?>
+				<?php echo $show_all ? '' : $this->render_pagination( $books, $paged ); ?>
 			<?php else : ?>
 				<div class="ne-gallery-empty">
 					<?php $fallback_books_html = $this->render_empty_user_books(); ?>
@@ -621,8 +634,20 @@ final class NeuroEcho_Book_Gallery {
 		return ob_get_clean();
 	}
 
+	private function get_gallery_search_value() {
+		if ( isset( $_GET['ne_book_search'] ) ) {
+			return trim( $this->sanitize_request_value( $_GET['ne_book_search'] ) );
+		}
+
+		if ( is_search() ) {
+			return trim( sanitize_text_field( get_search_query( false ) ) );
+		}
+
+		return '';
+	}
+
 	private function should_enqueue_assets() {
-		if ( is_singular( $this->get_gallery_post_types() ) || is_post_type_archive( self::CPT ) || is_author() || is_tax( self::TAX_AUTHOR ) ) {
+		if ( is_singular( $this->get_gallery_post_types() ) || is_post_type_archive( self::CPT ) || is_author() || is_search() || is_tag() || is_tax( self::TAX_AUTHOR ) ) {
 			return true;
 		}
 
@@ -741,6 +766,7 @@ final class NeuroEcho_Book_Gallery {
 		$ids        = array();
 		$search     = trim( $search );
 		$post_types = $this->get_gallery_post_types();
+		$terms      = $this->get_search_terms( $search );
 
 		if ( '' === $search ) {
 			return $ids;
@@ -763,71 +789,47 @@ final class NeuroEcho_Book_Gallery {
 
 		$ids = array_merge( $ids, $text_query->posts );
 
-		$meta_query = new WP_Query(
-			array(
-				'post_type'              => $post_types,
-				'post_status'            => 'publish',
-				'posts_per_page'         => -1,
-				'fields'                 => 'ids',
-				'no_found_rows'          => true,
-				'update_post_meta_cache' => false,
-				'update_post_term_cache' => false,
-				'meta_query'             => array(
-					'relation' => 'OR',
-					array(
-						'key'     => self::META . 'subtitle',
-						'value'   => $search,
-						'compare' => 'LIKE',
-					),
-					array(
-						'key'     => self::META . 'format',
-						'value'   => $search,
-						'compare' => 'LIKE',
-					),
-					array(
-						'key'     => self::META . 'share_note',
-						'value'   => $search,
-						'compare' => 'LIKE',
-					),
-					array(
-						'key'     => self::META . 'isbn',
-						'value'   => $search,
-						'compare' => 'LIKE',
-					),
-					array(
-						'key'     => self::META . 'publication_year',
-						'value'   => $search,
-						'compare' => 'LIKE',
-					),
-					array(
-						'key'     => self::META . 'page_count',
-						'value'   => $search,
-						'compare' => 'LIKE',
-					),
-					array(
-						'key'     => self::META . 'shelf_location',
-						'value'   => $search,
-						'compare' => 'LIKE',
-					),
-					array(
-						'key'     => self::META . 'loan_status',
-						'value'   => $search,
-						'compare' => 'LIKE',
-					),
-				),
-			)
+		$meta_terms = $terms ? $terms : array( $search );
+		$meta_keys  = array(
+			'subtitle',
+			'format',
+			'share_note',
+			'isbn',
+			'publication_year',
+			'page_count',
+			'shelf_location',
+			'loan_status',
 		);
+		$meta_query = array( 'relation' => 'OR' );
 
-		$ids = array_merge( $ids, $meta_query->posts );
+		foreach ( $meta_terms as $term ) {
+			foreach ( $meta_keys as $meta_key ) {
+				$meta_query[] = array(
+					'key'     => self::META . $meta_key,
+					'value'   => $term,
+					'compare' => 'LIKE',
+				);
+			}
+		}
 
-		$term_ids = get_terms(
-			array(
-				'taxonomy'   => self::TAX_AUTHOR,
-				'hide_empty' => false,
-				'fields'     => 'ids',
-				'search'     => $search,
-			)
-		);
+		if ( count( $meta_query ) > 1 ) {
+			$meta_result = new WP_Query(
+				array(
+					'post_type'              => $post_types,
+					'post_status'            => 'publish',
+					'posts_per_page'         => -1,
+					'fields'                 => 'ids',
+					'no_found_rows'          => true,
+					'update_post_meta_cache' => false,
+					'update_post_term_cache' => false,
+					'meta_query'             => $meta_query,
+				)
+			);
+
+			$ids = array_merge( $ids, $meta_result->posts );
+		}
+
+		$term_ids = $this->find_term_ids_for_search( self::TAX_AUTHOR, $search );
 
 		if ( ! is_wp_error( $term_ids ) && $term_ids ) {
 			$author_query = new WP_Query(
@@ -852,14 +854,7 @@ final class NeuroEcho_Book_Gallery {
 			$ids = array_merge( $ids, $author_query->posts );
 		}
 
-		$tag_ids = get_terms(
-			array(
-				'taxonomy'   => 'post_tag',
-				'hide_empty' => false,
-				'fields'     => 'ids',
-				'search'     => $search,
-			)
-		);
+		$tag_ids = $this->find_term_ids_for_search( 'post_tag', $search );
 
 		if ( ! is_wp_error( $tag_ids ) && $tag_ids ) {
 			$tag_query = new WP_Query(
@@ -903,14 +898,21 @@ final class NeuroEcho_Book_Gallery {
 			$ids = array_merge( $ids, $user_author_query->posts );
 		}
 
-		$comments = get_comments(
-			array(
-				'status'      => 'approve',
-				'post_status' => 'publish',
-				'search'      => $search,
-				'number'      => 100,
-			)
-		);
+		$comments = array();
+
+		foreach ( $this->get_search_terms( $search ) as $term ) {
+			$comments = array_merge(
+				$comments,
+				get_comments(
+					array(
+						'status'      => 'approve',
+						'post_status' => 'publish',
+						'search'      => $term,
+						'number'      => 100,
+					)
+				)
+			);
+		}
 
 		foreach ( $comments as $comment ) {
 			$comment_post_id = absint( $comment->comment_post_ID );
@@ -927,17 +929,72 @@ final class NeuroEcho_Book_Gallery {
 		global $wpdb;
 
 		$post_types = array_values( array_filter( array_map( 'sanitize_key', (array) $post_types ) ) );
+		$terms      = $this->get_search_terms( $search );
 
-		if ( empty( $post_types ) ) {
+		if ( empty( $post_types ) || empty( $terms ) ) {
 			return array();
 		}
 
-		$like              = '%' . $wpdb->esc_like( $search ) . '%';
 		$type_placeholders = implode( ', ', array_fill( 0, count( $post_types ), '%s' ) );
-		$sql               = "SELECT ID FROM {$wpdb->posts} WHERE post_status = %s AND post_type IN ({$type_placeholders}) AND (post_title LIKE %s OR post_excerpt LIKE %s OR post_content LIKE %s) ORDER BY post_date DESC";
-		$values            = array_merge( array( 'publish' ), $post_types, array( $like, $like, $like ) );
+		$conditions        = array();
+		$values            = array_merge( array( 'publish' ), $post_types );
+
+		foreach ( $terms as $term ) {
+			$like         = '%' . $wpdb->esc_like( $term ) . '%';
+			$conditions[] = '(post_title LIKE %s OR post_excerpt LIKE %s OR post_content LIKE %s)';
+			$values[]     = $like;
+			$values[]     = $like;
+			$values[]     = $like;
+		}
+
+		$sql = "SELECT ID FROM {$wpdb->posts} WHERE post_status = %s AND post_type IN ({$type_placeholders}) AND (" . implode( ' OR ', $conditions ) . ') ORDER BY post_date DESC';
 
 		return array_map( 'absint', $wpdb->get_col( $wpdb->prepare( $sql, $values ) ) );
+	}
+
+	private function get_search_terms( $search ) {
+		$normalized = preg_replace( '/\s+/u', ' ', (string) $search );
+		$search     = trim( null === $normalized ? (string) $search : $normalized );
+
+		if ( '' === $search ) {
+			return array();
+		}
+
+		$terms = array( $search );
+		$parts = preg_split( '/[\s\p{P}\p{S}]+/u', $search );
+
+		if ( false !== $parts ) {
+			foreach ( $parts as $part ) {
+				$part = trim( $part );
+
+				if ( '' !== $part ) {
+					$terms[] = $part;
+				}
+			}
+		}
+
+		return array_values( array_unique( $terms ) );
+	}
+
+	private function find_term_ids_for_search( $taxonomy, $search ) {
+		$ids = array();
+
+		foreach ( $this->get_search_terms( $search ) as $term ) {
+			$term_ids = get_terms(
+				array(
+					'taxonomy'   => $taxonomy,
+					'hide_empty' => false,
+					'fields'     => 'ids',
+					'search'     => $term,
+				)
+			);
+
+			if ( ! is_wp_error( $term_ids ) && $term_ids ) {
+				$ids = array_merge( $ids, array_map( 'absint', $term_ids ) );
+			}
+		}
+
+		return array_values( array_unique( array_filter( $ids ) ) );
 	}
 
 	private function render_empty_user_books() {
@@ -995,16 +1052,20 @@ final class NeuroEcho_Book_Gallery {
 	}
 
 	private function find_user_author_ids_for_search( $search ) {
-		$user_query = new WP_User_Query(
-			array(
-				'fields'         => 'ID',
-				'number'         => 50,
-				'search'         => '*' . $search . '*',
-				'search_columns' => array( 'display_name', 'user_login', 'user_nicename' ),
-			)
-		);
+		$user_ids = array();
 
-		$user_ids = $user_query->get_results();
+		foreach ( $this->get_search_terms( $search ) as $term ) {
+			$user_query = new WP_User_Query(
+				array(
+					'fields'         => 'ID',
+					'number'         => 50,
+					'search'         => '*' . $term . '*',
+					'search_columns' => array( 'display_name', 'user_login', 'user_nicename' ),
+				)
+			);
+
+			$user_ids = array_merge( $user_ids, $user_query->get_results() );
+		}
 
 		return array_values( array_unique( array_filter( array_map( 'absint', $user_ids ) ) ) );
 	}
@@ -1756,6 +1817,30 @@ final class NeuroEcho_Book_Gallery {
 		return $template;
 	}
 
+	public function search_template( $template ) {
+		if ( is_search() ) {
+			$plugin_template = plugin_dir_path( __FILE__ ) . 'templates/search.php';
+
+			if ( file_exists( $plugin_template ) ) {
+				return $plugin_template;
+			}
+		}
+
+		return $template;
+	}
+
+	public function tag_template( $template ) {
+		if ( is_tag() ) {
+			$plugin_template = plugin_dir_path( __FILE__ ) . 'templates/tag.php';
+
+			if ( file_exists( $plugin_template ) ) {
+				return $plugin_template;
+			}
+		}
+
+		return $template;
+	}
+
 	public function taxonomy_template( $template ) {
 		if ( is_tax( self::TAX_AUTHOR ) ) {
 			$plugin_template = plugin_dir_path( __FILE__ ) . 'templates/taxonomy-ne_book_author.php';
@@ -1773,7 +1858,7 @@ final class NeuroEcho_Book_Gallery {
 			$classes[] = 'ne-book-reader-page';
 		}
 
-		if ( is_post_type_archive( self::CPT ) || is_author() || is_tax( self::TAX_AUTHOR ) ) {
+		if ( is_post_type_archive( self::CPT ) || is_author() || is_search() || is_tag() || is_tax( self::TAX_AUTHOR ) ) {
 			$classes[] = 'ne-book-archive-page';
 		}
 
