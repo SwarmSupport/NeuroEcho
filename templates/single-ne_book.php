@@ -17,10 +17,11 @@ get_header();
 	while ( have_posts() ) :
 		the_post();
 
-		$meta             = NeuroEcho_Book_Gallery::get_book_meta( get_the_ID() );
-		$archive_url      = get_post_type_archive_link( NeuroEcho_Book_Gallery::CPT );
-		$gallery_url      = $archive_url ? $archive_url : home_url( '/' );
-		$comments_enabled = comments_open() || get_comments_number();
+			$meta             = NeuroEcho_Book_Gallery::get_book_meta( get_the_ID() );
+			$archive_url      = get_post_type_archive_link( NeuroEcho_Book_Gallery::CPT );
+			$gallery_url      = $archive_url ? $archive_url : home_url( '/' );
+			$comments_enabled = comments_open() || get_comments_number();
+			$tag_links        = NeuroEcho_Book_Gallery::render_tag_links( get_the_ID() );
 		?>
 <main id="primary" class="ne-reader-shell" data-ne-reader data-ne-reader-book-id="<?php echo esc_attr( get_the_ID() ); ?>">
 	<div class="ne-reading-progress" data-ne-reading-progress aria-hidden="true"></div>
@@ -53,10 +54,13 @@ get_header();
 						<span><?php echo esc_html( NeuroEcho_Book_Gallery::get_comment_count_label( get_the_ID() ) ); ?></span>
 					</div>
 
-					<div class="ne-reader-library-card">
-						<h2><?php esc_html_e( 'Library Card', 'neuroecho-book-gallery' ); ?></h2>
-						<?php echo NeuroEcho_Book_Gallery::render_loan_status_badge( get_the_ID(), $meta ); ?>
-						<dl>
+						<div class="ne-reader-library-card">
+							<h2><?php esc_html_e( 'Book Details', 'neuroecho-book-gallery' ); ?></h2>
+							<?php echo NeuroEcho_Book_Gallery::render_loan_status_badge( get_the_ID(), $meta ); ?>
+							<?php if ( $tag_links ) : ?>
+								<div class="ne-reader-tags" aria-label="<?php esc_attr_e( 'Book tags', 'neuroecho-book-gallery' ); ?>"><?php echo $tag_links; ?></div>
+							<?php endif; ?>
+							<dl>
 							<?php if ( $meta['shelf_location'] ) : ?>
 								<div>
 									<dt><?php esc_html_e( 'Shelf', 'neuroecho-book-gallery' ); ?></dt>
@@ -113,10 +117,11 @@ get_header();
 
 					<nav class="ne-reader-toc" aria-label="<?php esc_attr_e( 'Chapter navigation', 'neuroecho-book-gallery' ); ?>" data-ne-toc></nav>
 
-					<div class="ne-reader-tool-actions">
-						<button type="button" data-ne-reset-reader><?php esc_html_e( 'Reset', 'neuroecho-book-gallery' ); ?></button>
-						<a href="#primary"><?php esc_html_e( 'Top', 'neuroecho-book-gallery' ); ?></a>
-					</div>
+						<div class="ne-reader-tool-actions">
+							<button type="button" data-ne-reset-reader><?php esc_html_e( 'Reset', 'neuroecho-book-gallery' ); ?></button>
+							<a href="#primary"><?php esc_html_e( 'Top', 'neuroecho-book-gallery' ); ?></a>
+							<a href="#ne-reader-bottom"><?php esc_html_e( 'Bottom', 'neuroecho-book-gallery' ); ?></a>
+						</div>
 
 					<div class="ne-reader-memory" data-ne-reader-memory hidden>
 						<p data-ne-reader-memory-text></p>
@@ -155,12 +160,13 @@ get_header();
 			</div>
 		</article>
 
-		<?php if ( $comments_enabled ) : ?>
-			<section id="ne-reader-comments" class="ne-reader-comments" aria-label="<?php esc_attr_e( 'Reader comments', 'neuroecho-book-gallery' ); ?>">
-				<?php comments_template(); ?>
-			</section>
-		<?php endif; ?>
-	</main>
+			<?php if ( $comments_enabled ) : ?>
+				<section id="ne-reader-comments" class="ne-reader-comments" aria-label="<?php esc_attr_e( 'Reader comments', 'neuroecho-book-gallery' ); ?>">
+					<?php comments_template(); ?>
+				</section>
+			<?php endif; ?>
+			<span id="ne-reader-bottom" class="ne-reader-bottom-anchor" tabindex="-1"></span>
+		</main>
 	<?php endwhile; ?>
 
 <?php

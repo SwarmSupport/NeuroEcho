@@ -45,6 +45,8 @@ final class NeuroEcho_Book_Gallery {
 
 		add_filter( 'single_template', array( $this, 'single_template' ) );
 		add_filter( 'archive_template', array( $this, 'archive_template' ) );
+		add_filter( 'author_template', array( $this, 'author_template' ) );
+		add_filter( 'taxonomy_template', array( $this, 'taxonomy_template' ) );
 		add_filter( 'theme_page_templates', array( $this, 'register_page_templates' ) );
 		add_filter( 'template_include', array( $this, 'page_template' ) );
 		add_filter( 'body_class', array( $this, 'body_class' ) );
@@ -92,7 +94,7 @@ final class NeuroEcho_Book_Gallery {
 				'rewrite'            => array( 'slug' => 'books' ),
 				'show_in_rest'       => true,
 				'supports'           => array( 'title', 'editor', 'excerpt', 'thumbnail', 'comments', 'revisions' ),
-				'taxonomies'         => array( self::TAX_AUTHOR ),
+				'taxonomies'         => array( self::TAX_AUTHOR, 'post_tag' ),
 				'publicly_queryable' => true,
 			)
 		);
@@ -123,6 +125,8 @@ final class NeuroEcho_Book_Gallery {
 				'rewrite'           => array( 'slug' => 'book-author' ),
 			)
 		);
+
+		register_taxonomy_for_object_type( 'post_tag', self::CPT );
 
 		$this->register_meta_fields();
 	}
@@ -587,41 +591,17 @@ final class NeuroEcho_Book_Gallery {
 				<?php echo $this->render_shelf_browser( $selected_shelf ); ?>
 			<?php endif; ?>
 
-			<?php if ( $books->have_posts() ) : ?>
-				<div class="ne-book-grid">
-					<?php
-					while ( $books->have_posts() ) :
-						$books->the_post();
-						$meta = self::get_book_meta( get_the_ID() );
+				<?php if ( $books->have_posts() ) : ?>
+					<div class="ne-book-grid">
+						<?php
+						while ( $books->have_posts() ) :
+							$books->the_post();
+							echo self::render_book_card( get_the_ID() );
+						endwhile;
 						?>
-						<article <?php post_class( 'ne-book-card' ); ?> data-ne-book-card>
-							<a class="ne-book-cover-link" href="<?php the_permalink(); ?>" aria-label="<?php echo esc_attr( sprintf( __( 'Read %s', 'neuroecho-book-gallery' ), get_the_title() ) ); ?>">
-								<?php echo self::render_cover( get_the_ID(), 'medium_large' ); ?>
-							</a>
-							<div class="ne-book-card-body">
-								<div class="ne-book-authors"><?php echo self::render_author_links( get_the_ID() ); ?></div>
-								<h3><a href="<?php the_permalink(); ?>"><?php the_title(); ?></a></h3>
-								<div class="ne-book-status-row"><?php echo self::render_loan_status_badge( get_the_ID(), $meta ); ?></div>
-								<?php if ( $meta['subtitle'] ) : ?>
-									<p class="ne-book-subtitle"><?php echo esc_html( $meta['subtitle'] ); ?></p>
-								<?php endif; ?>
-								<p class="ne-book-excerpt"><?php echo esc_html( wp_trim_words( get_the_excerpt(), 26 ) ); ?></p>
-								<?php if ( $meta['share_note'] ) : ?>
-									<p class="ne-share-note"><?php echo esc_html( wp_trim_words( $meta['share_note'], 22 ) ); ?></p>
-								<?php endif; ?>
-								<div class="ne-book-meta">
-									<?php echo self::render_book_facts( get_the_ID(), $meta ); ?>
-								</div>
-								<div class="ne-book-card-footer">
-									<span><?php echo esc_html( self::get_comment_count_label( get_the_ID() ) ); ?></span>
-									<a href="<?php the_permalink(); ?>"><?php esc_html_e( 'Read', 'neuroecho-book-gallery' ); ?></a>
-								</div>
-							</div>
-						</article>
-					<?php endwhile; ?>
-				</div>
+					</div>
 
-				<?php echo $show_all ? '' : $this->render_pagination( $books, $paged ); ?>
+					<?php echo $show_all ? '' : $this->render_pagination( $books, $paged ); ?>
 			<?php else : ?>
 				<div class="ne-gallery-empty">
 					<?php $fallback_books_html = $this->render_empty_user_books(); ?>
@@ -642,7 +622,7 @@ final class NeuroEcho_Book_Gallery {
 	}
 
 	private function should_enqueue_assets() {
-		if ( is_singular( $this->get_gallery_post_types() ) || is_post_type_archive( self::CPT ) ) {
+		if ( is_singular( $this->get_gallery_post_types() ) || is_post_type_archive( self::CPT ) || is_author() || is_tax( self::TAX_AUTHOR ) ) {
 			return true;
 		}
 
@@ -746,6 +726,10 @@ final class NeuroEcho_Book_Gallery {
 	}
 
 	private function get_gallery_post_types() {
+		return self::get_library_post_types();
+	}
+
+	public static function get_library_post_types() {
 		return array( self::CPT, 'post' );
 	}
 
@@ -868,6 +852,38 @@ final class NeuroEcho_Book_Gallery {
 			$ids = array_merge( $ids, $author_query->posts );
 		}
 
+		$tag_ids = get_terms(
+			array(
+				'taxonomy'   => 'post_tag',
+				'hide_empty' => false,
+				'fields'     => 'ids',
+				'search'     => $search,
+			)
+		);
+
+		if ( ! is_wp_error( $tag_ids ) && $tag_ids ) {
+			$tag_query = new WP_Query(
+				array(
+					'post_type'              => $post_types,
+					'post_status'            => 'publish',
+					'posts_per_page'         => -1,
+					'fields'                 => 'ids',
+					'no_found_rows'          => true,
+					'update_post_meta_cache' => false,
+					'update_post_term_cache' => false,
+					'tax_query'              => array(
+						array(
+							'taxonomy' => 'post_tag',
+							'field'    => 'term_id',
+							'terms'    => array_map( 'absint', $tag_ids ),
+						),
+					),
+				)
+			);
+
+			$ids = array_merge( $ids, $tag_query->posts );
+		}
+
 		$user_ids = $this->find_user_author_ids_for_search( $search );
 
 		if ( $user_ids ) {
@@ -941,32 +957,36 @@ final class NeuroEcho_Book_Gallery {
 		}
 
 		ob_start();
-		?>
-		<div class="ne-empty-books">
-			<h4><?php esc_html_e( 'Books from site authors', 'neuroecho-book-gallery' ); ?></h4>
-			<div class="ne-empty-book-list">
-				<?php
-				while ( $fallback_books->have_posts() ) :
-					$fallback_books->the_post();
-					$meta = self::get_book_meta( get_the_ID() );
-					?>
-					<article <?php post_class( 'ne-empty-book' ); ?>>
-						<a class="ne-empty-book-cover" href="<?php the_permalink(); ?>" aria-label="<?php echo esc_attr( sprintf( __( 'Read %s', 'neuroecho-book-gallery' ), get_the_title() ) ); ?>">
-							<?php echo self::render_cover( get_the_ID(), 'thumbnail' ); ?>
-						</a>
-						<div class="ne-empty-book-body">
-							<div class="ne-book-authors"><?php echo self::render_author_links( get_the_ID() ); ?></div>
-							<h4><a href="<?php the_permalink(); ?>"><?php the_title(); ?></a></h4>
-							<div class="ne-book-status-row"><?php echo self::render_loan_status_badge( get_the_ID(), $meta ); ?></div>
-							<p><?php echo esc_html( wp_trim_words( get_the_excerpt(), 22 ) ); ?></p>
-							<div class="ne-book-meta">
-								<?php echo self::render_book_facts( get_the_ID(), $meta ); ?>
+			?>
+			<div class="ne-empty-books">
+				<h4><?php esc_html_e( 'Books from site authors', 'neuroecho-book-gallery' ); ?></h4>
+				<div class="ne-empty-book-list">
+					<?php
+					while ( $fallback_books->have_posts() ) :
+						$fallback_books->the_post();
+						$meta      = self::get_book_meta( get_the_ID() );
+						$tag_links = self::render_tag_links( get_the_ID() );
+						?>
+						<article <?php post_class( 'ne-empty-book' ); ?>>
+							<a class="ne-empty-book-cover" href="<?php the_permalink(); ?>" aria-label="<?php echo esc_attr( sprintf( __( 'Read %s', 'neuroecho-book-gallery' ), get_the_title() ) ); ?>">
+								<?php echo self::render_cover( get_the_ID(), 'thumbnail' ); ?>
+							</a>
+							<div class="ne-empty-book-body">
+								<div class="ne-book-authors"><?php echo self::render_author_links( get_the_ID() ); ?></div>
+								<h4><a href="<?php the_permalink(); ?>"><?php the_title(); ?></a></h4>
+								<div class="ne-book-status-row"><?php echo self::render_loan_status_badge( get_the_ID(), $meta ); ?></div>
+								<?php if ( $tag_links ) : ?>
+									<div class="ne-book-tags ne-empty-book-tags" aria-label="<?php esc_attr_e( 'Book tags', 'neuroecho-book-gallery' ); ?>"><?php echo $tag_links; ?></div>
+								<?php endif; ?>
+								<p><?php echo esc_html( wp_trim_words( get_the_excerpt(), 22 ) ); ?></p>
+								<div class="ne-book-meta">
+									<?php echo self::render_book_facts( get_the_ID(), $meta ); ?>
+								</div>
 							</div>
-						</div>
-						<a class="ne-empty-book-read" href="<?php the_permalink(); ?>"><?php esc_html_e( 'Read', 'neuroecho-book-gallery' ); ?></a>
-					</article>
-				<?php endwhile; ?>
-			</div>
+							<a class="ne-empty-book-read" href="<?php the_permalink(); ?>"><?php esc_html_e( 'Read', 'neuroecho-book-gallery' ); ?></a>
+						</article>
+					<?php endwhile; ?>
+				</div>
 		</div>
 		<?php
 		wp_reset_postdata();
@@ -1277,36 +1297,45 @@ final class NeuroEcho_Book_Gallery {
 		);
 
 		ob_start();
-		?>
-		<section class="ne-library-panel ne-reviews-panel">
-			<div class="ne-library-panel-head">
-				<p class="ne-kicker"><?php esc_html_e( 'Reviews', 'neuroecho-book-gallery' ); ?></p>
-				<h2><?php esc_html_e( 'Book Reviews', 'neuroecho-book-gallery' ); ?></h2>
-			</div>
-			<div class="ne-review-list">
-				<?php
-				while ( $books->have_posts() ) :
-					$books->the_post();
-					$latest = get_comments(
-						array(
-							'post_id' => get_the_ID(),
-							'status'  => 'approve',
-							'number'  => 1,
-						)
-					);
-					?>
-					<article class="ne-review-card">
-						<h3><a href="<?php the_permalink(); ?>#ne-reader-comments"><?php the_title(); ?></a></h3>
-						<div class="ne-book-authors"><?php echo self::render_author_links( get_the_ID() ); ?></div>
-						<p class="ne-review-count"><?php echo esc_html( self::get_comment_count_label( get_the_ID() ) ); ?></p>
-						<?php if ( $latest ) : ?>
-							<blockquote><?php echo esc_html( wp_trim_words( $latest[0]->comment_content, 28 ) ); ?></blockquote>
-						<?php endif; ?>
-					</article>
-				<?php endwhile; ?>
-			</div>
-		</section>
-		<?php
+			?>
+			<section class="ne-library-panel ne-reviews-panel">
+				<div class="ne-library-panel-head">
+					<p class="ne-kicker"><?php esc_html_e( 'Reviews', 'neuroecho-book-gallery' ); ?></p>
+					<h2><?php esc_html_e( 'Book Reviews', 'neuroecho-book-gallery' ); ?></h2>
+				</div>
+				<?php if ( $books->have_posts() ) : ?>
+					<div class="ne-review-list">
+						<?php
+						while ( $books->have_posts() ) :
+							$books->the_post();
+							$latest = get_comments(
+								array(
+									'post_id' => get_the_ID(),
+									'status'  => 'approve',
+									'number'  => 1,
+								)
+							);
+							?>
+							<article class="ne-review-card">
+								<h3><a href="<?php the_permalink(); ?>#ne-reader-comments"><?php the_title(); ?></a></h3>
+								<div class="ne-book-authors"><?php echo self::render_author_links( get_the_ID() ); ?></div>
+								<p class="ne-review-count"><?php echo esc_html( self::get_comment_count_label( get_the_ID() ) ); ?></p>
+								<?php if ( $latest ) : ?>
+									<blockquote><?php echo esc_html( wp_trim_words( $latest[0]->comment_content, 28 ) ); ?></blockquote>
+								<?php else : ?>
+									<p><?php esc_html_e( 'No written review yet. Open the reader page to start the discussion.', 'neuroecho-book-gallery' ); ?></p>
+								<?php endif; ?>
+							</article>
+						<?php endwhile; ?>
+					</div>
+				<?php else : ?>
+					<div class="ne-gallery-empty ne-review-empty">
+						<h3><?php esc_html_e( 'No book reviews yet', 'neuroecho-book-gallery' ); ?></h3>
+						<p><?php esc_html_e( 'Reader comments and reviews will appear here after Books are shared.', 'neuroecho-book-gallery' ); ?></p>
+					</div>
+				<?php endif; ?>
+			</section>
+			<?php
 		wp_reset_postdata();
 
 		return ob_get_clean();
@@ -1467,6 +1496,76 @@ final class NeuroEcho_Book_Gallery {
 			'<span class="ne-cover-placeholder" aria-hidden="true"><span>%s</span></span>',
 			esc_html( $letters )
 		);
+	}
+
+	public static function render_book_card( $post_id ) {
+		$post_id = absint( $post_id );
+
+		if ( ! $post_id ) {
+			return '';
+		}
+
+		$meta      = self::get_book_meta( $post_id );
+		$title     = get_the_title( $post_id );
+		$permalink = get_permalink( $post_id );
+		$tag_links = self::render_tag_links( $post_id );
+		$classes   = implode( ' ', get_post_class( 'ne-book-card', $post_id ) );
+
+		ob_start();
+		?>
+		<article class="<?php echo esc_attr( $classes ); ?>" data-ne-book-card>
+			<a class="ne-book-cover-link" href="<?php echo esc_url( $permalink ); ?>" aria-label="<?php echo esc_attr( sprintf( __( 'Read %s', 'neuroecho-book-gallery' ), $title ) ); ?>">
+				<?php echo self::render_cover( $post_id, 'medium_large' ); ?>
+			</a>
+			<div class="ne-book-card-body">
+				<div class="ne-book-authors"><?php echo self::render_author_links( $post_id ); ?></div>
+				<h3><a href="<?php echo esc_url( $permalink ); ?>"><?php echo esc_html( $title ); ?></a></h3>
+				<div class="ne-book-status-row"><?php echo self::render_loan_status_badge( $post_id, $meta ); ?></div>
+				<?php if ( $tag_links ) : ?>
+					<div class="ne-book-tags" aria-label="<?php esc_attr_e( 'Book tags', 'neuroecho-book-gallery' ); ?>"><?php echo $tag_links; ?></div>
+				<?php endif; ?>
+				<?php if ( $meta['subtitle'] ) : ?>
+					<p class="ne-book-subtitle"><?php echo esc_html( $meta['subtitle'] ); ?></p>
+				<?php endif; ?>
+				<p class="ne-book-excerpt"><?php echo esc_html( wp_trim_words( get_the_excerpt( $post_id ), 26 ) ); ?></p>
+				<?php if ( $meta['share_note'] ) : ?>
+					<p class="ne-share-note"><?php echo esc_html( wp_trim_words( $meta['share_note'], 22 ) ); ?></p>
+				<?php endif; ?>
+				<div class="ne-book-meta">
+					<?php echo self::render_book_facts( $post_id, $meta ); ?>
+				</div>
+				<div class="ne-book-card-footer">
+					<span><?php echo esc_html( self::get_comment_count_label( $post_id ) ); ?></span>
+					<a href="<?php echo esc_url( $permalink ); ?>"><?php esc_html_e( 'Read', 'neuroecho-book-gallery' ); ?></a>
+				</div>
+			</div>
+		</article>
+		<?php
+
+		return ob_get_clean();
+	}
+
+	public static function render_tag_links( $post_id ) {
+		$terms = get_the_terms( $post_id, 'post_tag' );
+
+		if ( is_wp_error( $terms ) || empty( $terms ) ) {
+			return '';
+		}
+
+		$links = array();
+
+		foreach ( $terms as $term ) {
+			$link = get_term_link( $term );
+
+			if ( is_wp_error( $link ) ) {
+				$links[] = '<span>' . esc_html( $term->name ) . '</span>';
+				continue;
+			}
+
+			$links[] = sprintf( '<a href="%s" rel="tag">%s</a>', esc_url( $link ), esc_html( $term->name ) );
+		}
+
+		return implode( '', $links );
 	}
 
 	public static function render_author_links( $post_id ) {
@@ -1641,12 +1740,36 @@ final class NeuroEcho_Book_Gallery {
 		return $template;
 	}
 
+	public function author_template( $template ) {
+		if ( is_author() ) {
+			$plugin_template = plugin_dir_path( __FILE__ ) . 'templates/author.php';
+
+			if ( file_exists( $plugin_template ) ) {
+				return $plugin_template;
+			}
+		}
+
+		return $template;
+	}
+
+	public function taxonomy_template( $template ) {
+		if ( is_tax( self::TAX_AUTHOR ) ) {
+			$plugin_template = plugin_dir_path( __FILE__ ) . 'templates/taxonomy-ne_book_author.php';
+
+			if ( file_exists( $plugin_template ) ) {
+				return $plugin_template;
+			}
+		}
+
+		return $template;
+	}
+
 	public function body_class( $classes ) {
 		if ( is_singular( $this->get_gallery_post_types() ) ) {
 			$classes[] = 'ne-book-reader-page';
 		}
 
-		if ( is_post_type_archive( self::CPT ) ) {
+		if ( is_post_type_archive( self::CPT ) || is_author() || is_tax( self::TAX_AUTHOR ) ) {
 			$classes[] = 'ne-book-archive-page';
 		}
 

@@ -97,6 +97,10 @@
 			var fontSize = prefs.fontSize || defaultPrefs.fontSize;
 			var measure = prefs.measure || defaultPrefs.measure;
 
+			if (['paper', 'night', 'focus'].indexOf(theme) === -1) {
+				theme = defaultPrefs.theme;
+			}
+
 			reader.setAttribute('data-ne-theme', theme);
 			reader.style.setProperty('--ne-reader-size', fontSize + 'px');
 			reader.style.setProperty('--ne-reader-measure', measure + 'ch');

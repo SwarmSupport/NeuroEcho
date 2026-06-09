@@ -492,6 +492,48 @@
 	padding: 3px 9px;
 }
 
+.ne-book-tags,
+.ne-reader-tags {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 6px;
+}
+
+.ne-book-tags a,
+.ne-book-tags span,
+.ne-reader-tags a,
+.ne-reader-tags span {
+	align-items: center;
+	background: rgba(0, 240, 255, 0.14);
+	border: 1px solid rgba(0, 240, 255, 0.28);
+	border-radius: 999px;
+	color: var(--ne-ink);
+	display: inline-flex;
+	font-size: 0.76rem;
+	font-weight: 700;
+	line-height: 1.2;
+	min-height: 24px;
+	padding: 3px 9px;
+	text-decoration: none;
+	text-transform: uppercase;
+}
+
+.ne-reader-tags a,
+.ne-reader-tags span {
+	color: var(--ne-reader-text);
+}
+
+.ne-book-tags a:hover,
+.ne-reader-tags a:hover {
+	background: rgba(250, 158, 188, 0.22);
+	color: var(--ne-magenta);
+	text-decoration: none;
+}
+
+.ne-reader-tags {
+	margin-top: 10px;
+}
+
 .ne-book-status-row {
 	display: flex;
 	flex-wrap: wrap;
@@ -734,6 +776,11 @@
 	--ne-reader-muted: var(--ne-muted);
 	--ne-reader-panel: var(--ne-panel);
 	--ne-reader-line: var(--ne-line);
+	--ne-reader-card: rgba(255, 255, 255, 0.54);
+	--ne-reader-field: rgba(255, 255, 255, 0.74);
+	--ne-reader-button: linear-gradient(135deg, #ffffff 0%, #e0e5ec 100%);
+	--ne-reader-button-active: linear-gradient(135deg, #ffffff 0%, var(--ne-ruby) 100%);
+	--ne-reader-button-text: var(--ne-ink);
 	--ne-reader-size: 18px;
 	--ne-reader-measure: 70ch;
 	background:
@@ -754,6 +801,11 @@
 	--ne-reader-muted: #c7d6e5;
 	--ne-reader-panel: rgba(23, 17, 42, 0.88);
 	--ne-reader-line: rgba(255, 159, 196, 0.24);
+	--ne-reader-card: rgba(9, 7, 19, 0.5);
+	--ne-reader-field: rgba(9, 7, 19, 0.72);
+	--ne-reader-button: linear-gradient(135deg, #21183d 0%, #090713 100%);
+	--ne-reader-button-active: linear-gradient(135deg, #00f0ff 0%, #fa9ebc 100%);
+	--ne-reader-button-text: #f5eaff;
 }
 
 .ne-reader-shell[data-ne-theme="focus"] {
@@ -762,6 +814,11 @@
 	--ne-reader-muted: #5d7a8a;
 	--ne-reader-panel: rgba(255, 255, 255, 0.84);
 	--ne-reader-line: rgba(250, 158, 188, 0.46);
+	--ne-reader-card: rgba(255, 255, 255, 0.72);
+	--ne-reader-field: rgba(255, 255, 255, 0.86);
+	--ne-reader-button: linear-gradient(135deg, #ffffff 0%, #d8fff8 100%);
+	--ne-reader-button-active: linear-gradient(135deg, #ffc800 0%, #ffffff 100%);
+	--ne-reader-button-text: #3a0ca3;
 }
 
 .ne-reading-progress {
@@ -784,6 +841,10 @@
 .ne-reader-header {
 	align-items: stretch;
 	border-bottom: 3px solid rgba(250, 158, 188, 0.5);
+	display: grid;
+	gap: clamp(14px, 2vw, 26px);
+	grid-template-columns: minmax(220px, min(30vw, 320px)) minmax(0, 720px);
+	justify-content: flex-start;
 	margin-bottom: clamp(22px, 5vw, 54px);
 	padding-bottom: clamp(18px, 4vw, 38px);
 }
@@ -876,8 +937,8 @@
 	margin: 12px 0 0;
 }
 
-.ne-reader-library-card div {
-	background: rgba(255, 255, 255, 0.54);
+.ne-reader-library-card dl > div {
+	background: var(--ne-reader-card);
 	border: 1px solid var(--ne-reader-line);
 	border-radius: 8px;
 	padding: 8px 10px;
@@ -904,16 +965,22 @@
 	gap: 8px;
 }
 
+.ne-reader-bottom-anchor {
+	display: block;
+	height: 1px;
+	scroll-margin-top: 22px;
+}
+
 .ne-reader-actions a,
 .ne-reader-mode-group button,
 .ne-reader-tool-actions button,
 .ne-reader-tool-actions a {
 	align-items: center;
-	background: linear-gradient(135deg, #ffffff 0%, #e0e5ec 100%);
+	background: var(--ne-reader-button);
 	border: 1px solid #ffffff;
 	border-radius: 999px;
 	box-shadow: inset 0 2px 4px rgba(255, 255, 255, 0.8), 0 4px 8px rgba(93, 122, 138, 0.09);
-	color: var(--ne-ink);
+	color: var(--ne-reader-button-text);
 	cursor: pointer;
 	display: inline-flex;
 	font-family: inherit;
@@ -929,8 +996,8 @@
 
 .ne-reader-mode-group button[aria-pressed="true"],
 .ne-reader-actions a:first-child {
-	background: linear-gradient(135deg, #ffffff 0%, var(--ne-ruby) 100%);
-	color: var(--ne-ink);
+	background: var(--ne-reader-button-active);
+	color: var(--ne-reader-button-text);
 }
 
 .ne-reader-actions a:hover,
@@ -1014,10 +1081,10 @@
 .ne-reader-annotation-panel > button,
 .ne-reader-mini-actions button,
 .ne-reader-saved-item button {
-	background: linear-gradient(135deg, #ffffff 0%, #e0e5ec 100%);
+	background: var(--ne-reader-button);
 	border: 1px solid #ffffff;
 	border-radius: 999px;
-	color: var(--ne-ink);
+	color: var(--ne-reader-button-text);
 	cursor: pointer;
 	font-family: inherit;
 	font-size: 0.78rem;
@@ -1028,7 +1095,7 @@
 }
 
 .ne-reader-annotation-panel textarea {
-	background: rgba(255, 255, 255, 0.74);
+	background: var(--ne-reader-field);
 	border: 1px solid var(--ne-reader-line);
 	border-radius: var(--ne-radius);
 	color: var(--ne-reader-text);
@@ -1167,7 +1234,7 @@
 }
 
 .ne-reader-content blockquote {
-	background: rgba(255, 255, 255, 0.58);
+	background: var(--ne-reader-card);
 	border-left: 4px solid var(--ne-ruby);
 	border-radius: var(--ne-radius);
 	color: var(--ne-reader-muted);
@@ -1203,7 +1270,7 @@
 }
 
 .ne-reader-content pre {
-	background: rgba(255, 255, 255, 0.64);
+	background: var(--ne-reader-card);
 	border: 1px solid var(--ne-reader-line);
 	border-radius: var(--ne-radius);
 	color: var(--ne-reader-text);
@@ -1270,7 +1337,7 @@
 
 .ne-reader-comments input:not([type="submit"]):not([type="checkbox"]),
 .ne-reader-comments textarea {
-	background: rgba(255, 255, 255, 0.76);
+	background: var(--ne-reader-field);
 	border: 1px solid var(--ne-reader-line);
 	border-radius: var(--ne-radius);
 	color: var(--ne-reader-text);
@@ -1293,11 +1360,138 @@
 	text-transform: uppercase;
 }
 
+.ne-reader-comments .comments-area,
+.ne-reader-comments .comment-form {
+	display: grid;
+	gap: 14px;
+}
+
+.ne-reader-comments .comments-title {
+	margin: 0;
+}
+
+.ne-reader-comments .comment-body {
+	background: color-mix(in srgb, var(--ne-reader-panel) 72%, transparent);
+	border: 1px solid var(--ne-reader-line);
+	border-radius: var(--ne-radius);
+	display: grid;
+	gap: 10px;
+	padding: 14px;
+}
+
+.ne-reader-comments .comment-meta {
+	align-items: center;
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px 12px;
+}
+
+.ne-reader-comments .avatar {
+	border: 2px solid rgba(255, 255, 255, 0.82);
+	border-radius: 999px;
+	height: 42px;
+	width: 42px;
+}
+
+.ne-reader-comments .comment-author,
+.ne-reader-comments .comment-metadata,
+.ne-reader-comments .reply {
+	font-size: 0.86rem;
+	font-weight: 700;
+}
+
+.ne-reader-comments .comment-author .fn,
+.ne-reader-comments .comment-author .fn a {
+	color: var(--ne-reader-text);
+	text-decoration: none;
+}
+
+.ne-reader-comments .says {
+	display: none;
+}
+
+.ne-reader-comments .comment-metadata,
+.ne-reader-comments .comment-metadata a,
+.ne-reader-comments .logged-in-as,
+.ne-reader-comments .comment-notes {
+	color: var(--ne-reader-muted);
+}
+
+.ne-reader-comments .comment-content {
+	color: var(--ne-reader-text);
+	line-height: 1.65;
+}
+
+.ne-reader-comments .comment-content > * {
+	margin-bottom: 0;
+	margin-top: 0;
+}
+
+.ne-reader-comments .comment-content > * + * {
+	margin-top: 0.85em;
+}
+
+.ne-reader-comments .reply a,
+.ne-reader-comments .nav-links a {
+	color: var(--ne-ruby);
+	font-weight: 700;
+	text-decoration-thickness: 2px;
+	text-underline-offset: 3px;
+}
+
+.ne-reader-comments .comment-form p {
+	margin: 0;
+}
+
+.ne-reader-comments .comment-form label {
+	color: var(--ne-reader-muted);
+	display: block;
+	font-size: 0.82rem;
+	font-weight: 700;
+	margin-bottom: 6px;
+	text-transform: uppercase;
+}
+
+.ne-reader-comments .comment-form-cookies-consent {
+	align-items: flex-start;
+	display: flex;
+	gap: 8px;
+}
+
+.ne-reader-comments .comment-form-cookies-consent input {
+	margin-top: 4px;
+}
+
+.ne-review-card > p {
+	color: var(--ne-muted);
+	line-height: 1.5;
+	margin: 8px 0 0;
+}
+
 .ne-library-page,
-.ne-reading-room {
+.ne-reading-room,
+.ne-author-page {
 	margin: clamp(22px, 4vw, 56px) auto;
 	max-width: 1180px;
 	padding: 0 clamp(14px, 3vw, 24px);
+}
+
+.ne-author-archive {
+	margin-inline: auto;
+}
+
+.ne-author-bio {
+	background: rgba(255, 255, 255, 0.66);
+	border: 1px solid rgba(250, 158, 188, 0.32);
+	border-radius: var(--ne-radius);
+	color: var(--ne-muted);
+	line-height: 1.6;
+	margin: 0 0 22px;
+	padding: 14px 16px;
+}
+
+.ne-author-bio p {
+	margin: 0;
 }
 
 .ne-reading-room > .ne-library-panel,
@@ -1533,7 +1727,7 @@
 
 	.ne-reader-cover-wrap {
 		box-shadow: 8px 8px 0 rgba(250, 158, 188, 0.42), var(--ne-shadow);
-		margin-bottom: 28px;
+		margin-bottom: 14px;
 		max-width: 250px;
 	}
 
