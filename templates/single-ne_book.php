@@ -56,7 +56,6 @@ get_header();
 
 						<div class="ne-reader-library-card">
 							<h2><?php esc_html_e( 'Book Details', 'neuroecho-book-gallery' ); ?></h2>
-							<?php echo NeuroEcho_Book_Gallery::render_loan_status_badge( get_the_ID(), $meta ); ?>
 							<?php if ( $tag_links ) : ?>
 								<div class="ne-reader-tags" aria-label="<?php esc_attr_e( 'Book tags', 'neuroecho-book-gallery' ); ?>"><?php echo $tag_links; ?></div>
 							<?php endif; ?>
