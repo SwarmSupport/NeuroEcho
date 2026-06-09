@@ -1019,8 +1019,13 @@
 }
 
 .ne-reader-tool-actions {
+	background: var(--ne-reader-card);
+	border: 1px solid var(--ne-reader-line);
+	border-radius: 999px;
 	display: grid;
 	grid-template-columns: repeat(3, minmax(0, 1fr));
+	gap: 0;
+	padding: 4px;
 }
 
 .ne-reader-bottom-anchor {
@@ -1052,6 +1057,15 @@
 	transition: transform 160ms ease, box-shadow 160ms ease;
 }
 
+.ne-reader-tool-actions button,
+.ne-reader-tool-actions a {
+	background: transparent;
+	border: 0;
+	box-shadow: none;
+	min-height: 34px;
+	padding: 0 8px;
+}
+
 .ne-reader-mode-group button[aria-pressed="true"],
 .ne-reader-actions a:first-child {
 	background: var(--ne-reader-button-active);
@@ -1065,6 +1079,13 @@
 	box-shadow: inset 0 2px 4px rgba(255, 255, 255, 0.86), 0 8px 16px rgba(250, 158, 188, 0.22);
 	text-decoration: none;
 	transform: translateY(-1px) scale(1.03);
+}
+
+.ne-reader-tool-actions button:hover,
+.ne-reader-tool-actions a:hover {
+	background: var(--ne-reader-button-active);
+	box-shadow: none;
+	transform: none;
 }
 
 .ne-reader-layout {
@@ -1099,13 +1120,16 @@
 .ne-reader-mode-group + .ne-reader-control,
 .ne-reader-control + .ne-reader-control,
 .ne-reader-toc,
-.ne-reader-tool-actions,
 .ne-reader-memory,
 .ne-reader-bookmark-panel,
 .ne-reader-annotation-panel {
 	border-top: 1px solid var(--ne-reader-line);
 	margin-top: 16px;
 	padding-top: 16px;
+}
+
+.ne-reader-tool-actions {
+	margin-top: 16px;
 }
 
 .ne-reader-memory p,
@@ -1137,8 +1161,12 @@
 
 .ne-reader-bookmark-panel,
 .ne-reader-annotation-panel {
+	background: var(--ne-reader-card);
+	border: 1px solid var(--ne-reader-line);
+	border-radius: var(--ne-radius);
 	display: grid;
 	gap: 10px;
+	padding: 12px;
 }
 
 .ne-reader-bookmark-panel > button,
@@ -1172,7 +1200,7 @@
 	border-radius: var(--ne-radius);
 	color: var(--ne-reader-text);
 	font-family: inherit;
-	margin-bottom: 8px;
+	margin: 0;
 	min-height: 96px;
 	padding: 9px 10px;
 	resize: vertical;
@@ -1182,7 +1210,17 @@
 .ne-reader-saved-list {
 	display: grid;
 	gap: 8px;
-	margin-top: 10px;
+	margin-top: 0;
+	min-width: 0;
+}
+
+.ne-reader-saved-list p {
+	background:
+		linear-gradient(135deg, color-mix(in srgb, var(--ne-reader-field) 86%, transparent), color-mix(in srgb, var(--ne-reader-card) 78%, transparent));
+	border: 1px dashed var(--ne-reader-line);
+	border-radius: var(--ne-radius);
+	margin: 0;
+	padding: 10px;
 }
 
 .ne-reader-saved-item {
