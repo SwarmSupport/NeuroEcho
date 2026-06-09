@@ -102,6 +102,7 @@
 			}
 
 			reader.setAttribute('data-ne-theme', theme);
+			document.body.setAttribute('data-ne-reader-theme', theme);
 			reader.style.setProperty('--ne-reader-size', fontSize + 'px');
 			reader.style.setProperty('--ne-reader-measure', measure + 'ch');
 
